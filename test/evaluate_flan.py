@@ -104,17 +104,17 @@ def main(args):
 
     model = AutoModelForSeq2SeqLM.from_pretrained(args.model)
     tokenizer = AutoTokenizer.from_pretrained(args.model)
-    heads_per_gpu = len(model.encoder.block) // args.ngpu
-    device_map = {
-        gpu: list(
-            range(
-                0 + (gpu * heads_per_gpu),
-                (0 + (gpu * heads_per_gpu)) + heads_per_gpu,
-            )
-        )
-        for gpu in range(args.ngpu)
-    }
-    model.parallelize(device_map)
+    # heads_per_gpu = len(model.encoder.block) // args.ngpu
+    # device_map = {
+    #     gpu: list(
+    #         range(
+    #             0 + (gpu * heads_per_gpu),
+    #             (0 + (gpu * heads_per_gpu)) + heads_per_gpu,
+    #         )
+    #     )
+    #     for gpu in range(args.ngpu)
+    # }
+    # model.parallelize(device_map)
     model.eval()
     subjects = sorted(
         [
