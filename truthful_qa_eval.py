@@ -1,5 +1,5 @@
-from deepeval.benchmarks import MMLU
-from deepeval.benchmarks.tasks import MMLUTask
+from deepeval.benchmarks import TruthfulQA
+from deepeval.benchmarks.tasks import TruthfulQATask
 
 from deepeval.models import DeepEvalBaseLLM
 from transformers import BitsAndBytesConfig
@@ -11,17 +11,13 @@ from huggingface_hub import snapshot_download
 
 
 # Define benchmark with specific tasks and number of code generations
-benchmark = MMLU(
-    n_shots =1 # one can change n_shots !TODO: load n_shot from user
-)
+benchmark = TruthfulQA()
 
 class CustomLM(DeepEvalBaseLLM):
     def __init__(self, model_name="meta-llama/Meta-Llama-3-8B-Instruct", lora_path=None):
 
         # load quantization config from json if any !TODO
         # just take the quantized model path (assume the model is already quantized)
-
-
         self.model_name = model_name
         # load the sampling params
         self.sampling_params = SamplingParams(temperature=0)
@@ -42,13 +38,10 @@ class CustomLM(DeepEvalBaseLLM):
         self.model = llm
         self.tokenizer = tokenizer
 
-    def load_model(self):
-        return self.model
 
     def generate(self, prompt: str) -> str:
         # generate a single prompt output
-        model = self.load_model()
-
+        model = self.model
 
         # generate the model output
         if self.lora_enabled:
@@ -57,7 +50,6 @@ class CustomLM(DeepEvalBaseLLM):
             self.lora_request)
         else:
             output = model.generate(prompt, self.sampling_params)
-
 
         # extract the model outputs
         generated_text = output.outputs[0].text
