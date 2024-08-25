@@ -23,17 +23,29 @@ class CustomLlama3_8B(DeepEvalBaseLLM):
             bnb_4bit_use_double_quant=True,
         )
 
-        model_4bit = AutoModelForCausalLM.from_pretrained(
-            "meta-llama/Meta-Llama-3-8B-Instruct",
-            # quantization_config=quantization_config,
-        )
+        # model_4bit = AutoModelForCausalLM.from_pretrained(
+        #     "meta-llama/Meta-Llama-3-8B-Instruct",
+        #     # quantization_config=quantization_config,
+        # )
         tokenizer = AutoTokenizer.from_pretrained(
             "meta-llama/Meta-Llama-3-8B-Instruct")
 
-        self.model = model_4bit
+        model_name = "meta-llama/Meta-Llama-3-8B-Instruct"
+
+        model = vllm.LLM(
+            model=model_name,
+            trust_remote_code=True,
+            tensor_parallel_size=1,
+        )
+
+        self.sampling_params = SamplingParams(temperature=0, max_tokens=100)
+        self.model = model
         self.tokenizer = tokenizer
 
     def load_model(self):
+        return self.model
+
+    def load_vllm_model(self):
         return self.model
 
     def generate(self, prompt: str) -> str:
@@ -55,7 +67,7 @@ class CustomLlama3_8B(DeepEvalBaseLLM):
 
         return pipeline(prompt)
 
-    def generate_samples(self, prompt: str, n: int, temperature: float):
+    def generate_samples_old(self, prompt: str, n: int, temperature: float):
         chat_model = self.load_model()
 
         pipeline = transformers.pipeline(
@@ -66,7 +78,7 @@ class CustomLlama3_8B(DeepEvalBaseLLM):
             use_cache=True,
             device_map="auto",
             # max_length=100,
-            max_new_tokens = 100,
+            max_new_tokens=100,
             do_sample=True,
             # top_k=5,
             num_return_sequences=1,
@@ -78,9 +90,25 @@ class CustomLlama3_8B(DeepEvalBaseLLM):
             response = pipeline(prompt)
             print("\n--- the response is : ---\n")
             print(response)
-            
+
             response = response[0]["generated_text"]
             responses_list.append(response)
+
+        # print("the response list is :")
+        # print(responses_list)
+        return responses_list
+
+    def generate_samples(self, prompt: str, n: int, temperature: float):
+
+        prompts = [prompt for i in range(n)]
+        outputs = self.model.generate(prompts=prompts,
+                                      sampling_params=self.sampling_params,
+                                      prompt_token_ids=prompt_token_ids)
+
+        responses_list = []
+        for i in range(n):
+            output = outputs[i].outputs[0].text
+            responses_list.append(output)
 
         # print("the response list is :")
         # print(responses_list)
