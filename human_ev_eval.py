@@ -6,21 +6,25 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 import transformers
 import torch
 
+import vllm, re
+from huggingface_hub import snapshot_download
+from vllm import SamplingParams
+
+
 # Define benchmark with specific tasks and number of code generations
 benchmark = HumanEval(
-    tasks=[HumanEvalTask.HAS_CLOSE_ELEMENTS, HumanEvalTask.SORT_NUMBERS],
-    n=1
+    n=1 # take n from user
 )
 
 class CustomLM(DeepEvalBaseLLM):
 
-    def __init__(self, model_name="meta-llama/Meta-Llama-3-8B-Instruct"):
+    def __init__(self, model_name="meta-llama/Meta-Llama-3-8B-Instruct", lora_path=None):
         # load quantization config from json if any !TODO
         # just take the quantized model path (assume the model is already quantized)
         
         self.model_name = model_name
         # load the sampling params
-        self.sampling_params = SamplingParams(temperature=0, max_tokens=15)
+        self.sampling_params = SamplingParams(temperature=0, max_tokens=1024, skip_special_tokens=True)
 
         # load lora config from json if any !TODO
         # if the lora adapters are present, take the path
@@ -39,9 +43,32 @@ class CustomLM(DeepEvalBaseLLM):
         self.model = llm
         self.tokenizer = tokenizer
 
+
+    def extract_first_function(self,text):
+        # Regular expression to match a Python function definition
+        pattern = r'def\s+\w+\s*\([^)]*\)\s*(?:->\s*\w+\s*)?:\n(?:(?:\s+.*\n)+)'
+        
+        # Find the first match in the text
+        match = re.search(pattern, text)
+        
+        if match:
+            # Return the matched function definition
+            return match.group(0).rstrip()
+        else:
+            return "No function definition found."
+
+            
     def load_model(self):
         return self.model
 
+    def filter_code(self,completion: str) -> str:
+        # The program tends to overwrite, we only take the first function
+        completion = completion.lstrip("\n")
+        return completion.split("\n\n")[0]
+
+
+    def fix_indents(self,text: str) -> str:
+        return text.replace("\t", "    ")
 
     def generate(self, prompt: str) -> str:
         # generate a single prompt output
@@ -52,11 +79,11 @@ class CustomLM(DeepEvalBaseLLM):
             output = model.generate(prompt, self.sampling_params,
                                     self.lora_request)
         else:
-            print("-- prompt input:-- \n", prompt)
+            print("-- prompt input:--\n",prompt)
             output = model.generate(prompt, self.sampling_params)
 
-            print(" -- prompt output: --\n", output[0].outputs[0].text)
-            print(" === end of prompt output === ")
+            print(" -- start of prompt output: --\n", output[0].outputs[0].text)
+            print("\n === end of prompt output === \n")
         # extract the model outputs
         generated_text = output[0].outputs[0].text
         # return the output
@@ -64,17 +91,34 @@ class CustomLM(DeepEvalBaseLLM):
 
     def generate_samples(self, prompt: str, n: int, temperature: float):
         model = self.load_model()
+        prompts = [prompt for _ in range(n)]
+        print("-- prompt input:-- \n", prompts[0])
 
         if self.lora_enabled:
-            outputs = model.generate(prompt,
+            generated_outputs = model.generate(prompt,
                                      self.sampling_params,
                                     self.lora_request)
         else:
-            generated_outputs = model.generate(prompt, self.sampling_params)
+            generated_outputs = model.generate(prompts, self.sampling_params)
+
+        # extract text
+        generated_outputs = [output.outputs[0].text for output in generated_outputs]
+
+        # fix generations
+        generated_outputs = [self.filter_code(output) for output in generated_outputs]
+
+        generated_outputs = [output.replace("    ", "\t") for output in generated_outputs]
+
+        # generated_outputs = [self.fix_indents(output) for output in generated_outputs]
+
+        # extract the first def
+        generated_outputs = [self.extract_first_function(output) for output in generated_outputs]
 
         responses_list = []
         for i in range(n):
-            generated_text = generated_outputs[i].outputs[0].text
+            generated_text = generated_outputs[i]
+            print(" -- start of prompt output: --\n", generated_text)
+            print("\n === end of prompt output === \n")
             responses_list.append(generated_text)
 
         return responses_list
@@ -83,7 +127,7 @@ class CustomLM(DeepEvalBaseLLM):
         return self.generate(prompt)
 
     def get_model_name(self):
-        return "Llama-3 8B"
+        return f"{self.model_name}"
 
 model = CustomLM(model_name = 'meta-llama/Meta-Llama-3-8B-Instruct')
 benchmark.evaluate(model =model, k=1)

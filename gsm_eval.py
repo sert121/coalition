@@ -8,17 +8,13 @@ import torch
 import vllm
 
 # Define benchmark with specific tasks and number of code generations
-benchmark = HumanEval(
-    tasks=[HumanEvalTask.HAS_CLOSE_ELEMENTS, HumanEvalTask.SORT_NUMBERS],
-    n=1
-)
+# adapt this bro !TODO
 
 benchmark = GSM8K(
     n_shots = 0,
     enable_cot = 1,
     n_problems = 1 # number of problems
 )
-
 
 class CustomLM(DeepEvalBaseLLM):
 
