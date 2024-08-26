@@ -1,5 +1,8 @@
 from deepeval.benchmarks import TruthfulQA
 from deepeval.benchmarks.tasks import TruthfulQATask
+from deepeval.benchmarks.modes import TruthfulQAMode
+
+
 
 from deepeval.models import DeepEvalBaseLLM
 from transformers import BitsAndBytesConfig
@@ -8,19 +11,25 @@ import transformers
 import torch
 import vllm
 from huggingface_hub import snapshot_download
-
+from vllm import SamplingParams
 
 # Define benchmark with specific tasks and number of code generations
-benchmark = TruthfulQA()
+benchmark = TruthfulQA(
+    tasks=[TruthfulQATask.ADVERTISING, TruthfulQATask.FICTION],
+    mode=TruthfulQAMode.MC1)
+
 
 class CustomLM(DeepEvalBaseLLM):
-    def __init__(self, model_name="meta-llama/Meta-Llama-3-8B-Instruct", lora_path=None):
+
+    def __init__(self,
+                 model_name="meta-llama/Meta-Llama-3-8B-Instruct",
+                 lora_path=None):
 
         # load quantization config from json if any !TODO
         # just take the quantized model path (assume the model is already quantized)
         self.model_name = model_name
         # load the sampling params
-        self.sampling_params = SamplingParams(temperature=0)
+        self.sampling_params = SamplingParams(temperature=0, max_tokens=15)
 
         # load lora config from json if any !TODO
         # if the lora adapters are present, take the path
@@ -33,26 +42,31 @@ class CustomLM(DeepEvalBaseLLM):
         else:
             # insert vllm code to load model (with above c)
             llm = vllm.LLM(model=model_name)
+            self.lora_enabled = False
         tokenizer = AutoTokenizer.from_pretrained(model_name)
 
         self.model = llm
         self.tokenizer = tokenizer
 
+    def load_model(self):
+        return self.model
 
     def generate(self, prompt: str) -> str:
         # generate a single prompt output
-        model = self.model
+        model = self.load_model()
 
         # generate the model output
         if self.lora_enabled:
-            output = model.generate(prompt, 
-            self.sampling_params, 
-            self.lora_request)
+            output = model.generate(prompt, self.sampling_params,
+                                    self.lora_request)
         else:
+            print("-- prompt input:-- \n", prompt)
             output = model.generate(prompt, self.sampling_params)
 
+            print(" -- prompt output: --\n", output[0].outputs[0].text)
+            print(" === end of prompt output === ")
         # extract the model outputs
-        generated_text = output.outputs[0].text
+        generated_text = output[0].outputs[0].text
         # return the output
         return generated_text
 
@@ -62,6 +76,11 @@ class CustomLM(DeepEvalBaseLLM):
     def get_model_name(self):
         return f"model name {self.model_name}"
 
-benchmark.evaluate(model = CustomLM()) # no parameter k 
+model = CustomLM(model_name = 'meta-llama/Meta-Llama-3-8B-Instruct' )
+benchmark.evaluate(model = model) # no parameter k
 # benchmark.evaluate(model=gpt_4, k=1)
 print(benchmark.overall_score)
+
+print("saving benchmark predictions to csv")
+df = benchmark.predictions
+df.to_csv('truthfulqa_benchmark_predictions.csv')
