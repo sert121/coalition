@@ -140,6 +140,12 @@ class TruthfulQA(DeepEvalBaseBenchmark):
             score = self.scorer.exact_match_score(golden.expected_output,
                                                   prediction)
         elif mode == TruthfulQAMode.MC2:
+
+            print("** the golden expected output is: ", golden.expected_output)
+            try:
+                prediction = extracted_list[0] # parsing the actual multi choice answer
+            except:
+                pass
             score = self.scorer.truth_identification_score(
                 golden.expected_output, prediction)
 

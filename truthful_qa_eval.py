@@ -16,8 +16,7 @@ from vllm import SamplingParams
 # Define benchmark with specific tasks and number of code generations
 benchmark = TruthfulQA(
     tasks=[TruthfulQATask.ADVERTISING, TruthfulQATask.FICTION],
-    mode=TruthfulQAMode.MC1)
-
+    mode=TruthfulQAMode.MC2)
 
 class CustomLM(DeepEvalBaseLLM):
 

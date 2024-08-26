@@ -1,19 +1,19 @@
-from deepeval.benchmarks import MMLU
-from deepeval.benchmarks.tasks import MMLUTask
-
+from deepeval.benchmarks import HumanEval
+from deepeval.benchmarks.tasks import HumanEvalTask
 from deepeval.models import DeepEvalBaseLLM
 from transformers import BitsAndBytesConfig
 from transformers import AutoModelForCausalLM, AutoTokenizer
 import transformers
 import torch
-import vllm
 
 # Define benchmark with specific tasks and number of code generations
-benchmark = MMLU(
-    n_shots =1 # one can change n_shots !TODO: load n_shot from user
+benchmark = HumanEval(
+    tasks=[HumanEvalTask.HAS_CLOSE_ELEMENTS, HumanEvalTask.SORT_NUMBERS],
+    n=1
 )
 
 class CustomLM(DeepEvalBaseLLM):
+
     def __init__(self, model_name="meta-llama/Meta-Llama-3-8B-Instruct"):
         # load quantization config from json if any !TODO
         # just take the quantized model path (assume the model is already quantized)
@@ -42,6 +42,7 @@ class CustomLM(DeepEvalBaseLLM):
     def load_model(self):
         return self.model
 
+
     def generate(self, prompt: str) -> str:
         # generate a single prompt output
         model = self.load_model()
@@ -61,16 +62,30 @@ class CustomLM(DeepEvalBaseLLM):
         # return the output
         return generated_text
 
+    def generate_samples(self, prompt: str, n: int, temperature: float):
+        model = self.load_model()
+
+        if self.lora_enabled:
+            outputs = model.generate(prompt,
+                                     self.sampling_params,
+                                    self.lora_request)
+        else:
+            generated_outputs = model.generate(prompt, self.sampling_params)
+
+        responses_list = []
+        for i in range(n):
+            generated_text = generated_outputs[i].outputs[0].text
+            responses_list.append(generated_text)
+
+        return responses_list
+
     async def a_generate(self, prompt: str) -> str:
         return self.generate(prompt)
 
     def get_model_name(self):
-        return "model name "
+        return "Llama-3 8B"
 
 model = CustomLM(model_name = 'meta-llama/Meta-Llama-3-8B-Instruct')
-benchmark.evaluate(model = model) # no parameter k 
+benchmark.evaluate(model =model, k=1)
 # benchmark.evaluate(model=gpt_4, k=1)
 print(benchmark.overall_score)
-print("saving benchmark predictions to csv")
-df = benchmark.predictions
-df.to_csv('truthfulqa_benchmark_predictions.csv')
