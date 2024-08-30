@@ -16,6 +16,23 @@ def run_all_benchmarks(config):
         result_deepemo = deepemo.run_benchmark(config)
         results.append(result_deepemo)
     
+    elif config.eval_type == 'human_eval':
+        result_human_eval = human_eval.run_benchmark(config)
+        results.append(result_human
+    
+    elif config.eval_type == 'mbpp':
+        pass #!TODO
+
+    elif config.eval_type == 'bigbench_hard':
+        pass #!TODO
+
+    elif config.eval_type == 'hellaswag':
+        pass # !TODO
+    
+    elif config.eval_type == 'drop':
+        pass # !TODO
+
+    
     return results
 
 def parse_main_args():
