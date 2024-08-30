@@ -8,16 +8,13 @@ import transformers
 import torch
 import vllm
 
-# Define benchmark with specific tasks and number of code generations
-benchmark = MMLU(
-    n_shots =1 # one can change n_shots !TODO: load n_shot from user
-)
+
 
 class CustomLM(DeepEvalBaseLLM):
     def __init__(self, model_name="meta-llama/Meta-Llama-3-8B-Instruct"):
         # load quantization config from json if any !TODO
         # just take the quantized model path (assume the model is already quantized)
-        
+
         self.model_name = model_name
         # load the sampling params
         self.sampling_params = SamplingParams(temperature=0, max_tokens=15)
@@ -67,10 +64,19 @@ class CustomLM(DeepEvalBaseLLM):
     def get_model_name(self):
         return "model name "
 
-model = CustomLM(model_name = 'meta-llama/Meta-Llama-3-8B-Instruct')
-benchmark.evaluate(model = model) # no parameter k 
-# benchmark.evaluate(model=gpt_4, k=1)
-print(benchmark.overall_score)
-print("saving benchmark predictions to csv")
-df = benchmark.predictions
-df.to_csv('truthfulqa_benchmark_predictions.csv')
+
+def run_mmlu_benchmark(config):
+    # parse and load the config !TODO
+    config = _
+
+    # Define benchmark with specific tasks and number of code generations
+    benchmark = MMLU(
+        n_shots=1  # one can change n_shots !TODO: load n_shot from user
+    )
+    model = CustomLM(model_name='meta-llama/Meta-Llama-3-8B-Instruct')
+    benchmark.evaluate(model=model)  # no parameter k
+    # benchmark.evaluate(model=gpt_4, k=1)
+    print(benchmark.overall_score)
+    print("saving benchmark predictions to csv")
+    df = benchmark.predictions
+    df.to_csv('truthfulqa_benchmark_predictions.csv')

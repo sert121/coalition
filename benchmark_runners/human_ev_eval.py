@@ -11,17 +11,12 @@ from huggingface_hub import snapshot_download
 from vllm import SamplingParams
 
 
-# Define benchmark with specific tasks and number of code generations
-benchmark = HumanEval(
-    n=1 # take n from user
-)
-
 class CustomLM(DeepEvalBaseLLM):
 
     def __init__(self, model_name="meta-llama/Meta-Llama-3-8B-Instruct", lora_path=None):
         # load quantization config from json if any !TODO
         # just take the quantized model path (assume the model is already quantized)
-        
+
         self.model_name = model_name
         # load the sampling params
         self.sampling_params = SamplingParams(temperature=0, max_tokens=1024, skip_special_tokens=True)
@@ -47,17 +42,17 @@ class CustomLM(DeepEvalBaseLLM):
     def extract_first_function(self,text):
         # Regular expression to match a Python function definition
         pattern = r'def\s+\w+\s*\([^)]*\)\s*(?:->\s*\w+\s*)?:\n(?:(?:\s+.*\n)+)'
-        
+
         # Find the first match in the text
         match = re.search(pattern, text)
-        
+
         if match:
             # Return the matched function definition
             return match.group(0).rstrip()
         else:
             return "No function definition found."
 
-            
+
     def load_model(self):
         return self.model
 
@@ -129,7 +124,16 @@ class CustomLM(DeepEvalBaseLLM):
     def get_model_name(self):
         return f"{self.model_name}"
 
-model = CustomLM(model_name = 'meta-llama/Meta-Llama-3-8B-Instruct')
-benchmark.evaluate(model =model, k=1)
-# benchmark.evaluate(model=gpt_4, k=1)
-print(benchmark.overall_score)
+
+def run_humaneval_benchmark(config):
+    # parse and load the config !TODO
+
+    # Define benchmark with specific tasks and number of code generations
+    benchmark = HumanEval(
+        n=1 # take n from user
+    )
+
+    model = CustomLM(model_name='meta-llama/Meta-Llama-3-8B-Instruct')
+    benchmark.evaluate(model=model, k=1)
+    # benchmark.evaluate(model=gpt_4, k=1)
+    print(benchmark.overall_score)
