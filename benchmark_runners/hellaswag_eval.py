@@ -1,5 +1,6 @@
-from deepeval.benchmarks import MMLU
-from deepeval.benchmarks.tasks import MMLUTask
+from deepeval.benchmarks import HellaSwag
+from deepeval.benchmarks.tasks import HellaSwagTask
+
 
 from deepeval.models import DeepEvalBaseLLM
 from transformers import BitsAndBytesConfig
@@ -7,14 +8,18 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 import transformers
 import torch
 import vllm
-
+from huggingface_hub import snapshot_download
+from vllm import SamplingParams
 
 
 class CustomLM(DeepEvalBaseLLM):
-    def __init__(self, model_name="meta-llama/Meta-Llama-3-8B-Instruct"):
+
+    def __init__(self,
+                 model_name="meta-llama/Meta-Llama-3-8B-Instruct",
+                 lora_path=None):
+
         # load quantization config from json if any !TODO
         # just take the quantized model path (assume the model is already quantized)
-
         self.model_name = model_name
         # load the sampling params
         self.sampling_params = SamplingParams(temperature=0, max_tokens=15)
@@ -62,23 +67,49 @@ class CustomLM(DeepEvalBaseLLM):
         return self.generate(prompt)
 
     def get_model_name(self):
-        return "model name "
+        return f"model name {self.model_name}"
+
+    def generate_samples(self, prompt: str, n: int, temperature: float):
+        model = self.load_model()
+        prompts = [prompt for _ in range(n)]
+        print("-- prompt input:-- \n", prompts[0])
+
+        if self.lora_enabled:
+            generated_outputs = model.generate(prompt,
+                                     self.sampling_params,
+                                    self.lora_request)
+        else:
+            generated_outputs = model.generate(prompts, self.sampling_params)
+
+        # extract text
+        generated_outputs = [output.outputs[0].text for output in generated_outputs]
+
+        # extract the first def
+        generated_outputs = [self.extract_first_function(output) for output in generated_outputs]
+
+        responses_list = []
+        for i in range(n):
+            generated_text = generated_outputs[i]
+            print(" -- start of prompt output: --\n", generated_text)
+            print("\n === end of prompt output === \n")
+            responses_list.append(generated_text)
+
+        return responses_list
 
 
-def run_mmlu_benchmark(config):
+def run_hellaswag_benchmark(config):
     # parse and load the config !TODO
-    config = _
 
-    # Define benchmark with specific tasks and number of code generations
-    benchmark = MMLU(
-        n_shots=1  # one can change n_shots !TODO: load n_shot from user
-    )
-    model = CustomLM(model_name='meta-llama/Meta-Llama-3-8B-Instruct')
-    benchmark.evaluate(model=model)  # no parameter k
+    benchmark = HellaSwag(n_shots=1)
+
+    model = CustomLM(model_name = 'meta-llama/Meta-Llama-3-8B-Instruct')
+    benchmark.evaluate(model = model) # include batch size for batch mode
+
     # benchmark.evaluate(model=gpt_4, k=1)
     print(benchmark.overall_score)
+
     print("saving benchmark predictions to csv")
     df = benchmark.predictions
-    df.to_csv('truthfulqa_benchmark_predictions.csv')
+    df.to_csv('hellaswag_benchmark_predictions.csv')
 
     return benchmark.overall_score, benchmark.predictions

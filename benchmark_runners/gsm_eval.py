@@ -78,3 +78,5 @@ def run_gsm_benchmark(config):
 
     benchmark.evaluate(model=CustomLM())
     print(benchmark.overall_score)
+
+    return benchmark.overall_score, benchmark.predictions

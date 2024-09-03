@@ -1,5 +1,8 @@
-from deepeval.benchmarks import MMLU
-from deepeval.benchmarks.tasks import MMLUTask
+from deepeval.benchmarks import TruthfulQA
+from deepeval.benchmarks.tasks import TruthfulQATask
+from deepeval.benchmarks.modes import TruthfulQAMode
+
+
 
 from deepeval.models import DeepEvalBaseLLM
 from transformers import BitsAndBytesConfig
@@ -7,14 +10,18 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 import transformers
 import torch
 import vllm
-
+from huggingface_hub import snapshot_download
+from vllm import SamplingParams
 
 
 class CustomLM(DeepEvalBaseLLM):
-    def __init__(self, model_name="meta-llama/Meta-Llama-3-8B-Instruct"):
+
+    def __init__(self,
+                 model_name="meta-llama/Meta-Llama-3-8B-Instruct",
+                 lora_path=None):
+
         # load quantization config from json if any !TODO
         # just take the quantized model path (assume the model is already quantized)
-
         self.model_name = model_name
         # load the sampling params
         self.sampling_params = SamplingParams(temperature=0, max_tokens=15)
@@ -62,23 +69,21 @@ class CustomLM(DeepEvalBaseLLM):
         return self.generate(prompt)
 
     def get_model_name(self):
-        return "model name "
+        return f"model name {self.model_name}"
 
 
-def run_mmlu_benchmark(config):
-    # parse and load the config !TODO
-    config = _
+def run_drop_benchmark(config):
 
     # Define benchmark with specific tasks and number of code generations
-    benchmark = MMLU(
-        n_shots=1  # one can change n_shots !TODO: load n_shot from user
-    )
-    model = CustomLM(model_name='meta-llama/Meta-Llama-3-8B-Instruct')
-    benchmark.evaluate(model=model)  # no parameter k
-    # benchmark.evaluate(model=gpt_4, k=1)
+
+    # provide custom config for the class
+    benchmark = DROP()
+    model = CustomLM(model_name = 'meta-llama/Meta-Llama-3-8B-Instruct' )
+
+    benchmark.evaluate(model = model) # no parameter k  
+
     print(benchmark.overall_score)
+
     print("saving benchmark predictions to csv")
     df = benchmark.predictions
-    df.to_csv('truthfulqa_benchmark_predictions.csv')
-
-    return benchmark.overall_score, benchmark.predictions
+    df.to_csv('drop_benchmark_predictions.csv')

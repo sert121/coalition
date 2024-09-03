@@ -1,43 +1,39 @@
 import argparse
-from benchmarks import gsm_eval, mmlu_eval, human_eval
+from benchmark_runners import gsm_eval, mmlu_eval, deepemo, human_ev_eval, mbpp_eval, bigbench_hard_eval, hellaswag_eval, drop_eval
 
-def run_all_benchmarks(config):
+def run_benchmarks(config = {}):
     results = []
-
+    
     if config.eval_type == 'gsm':
         result_gsm = gsm_eval.run_benchmark(config)
-        results.append(result_gsm)
     
     elif config.eval_type == 'mmlu':
         result_mmlu = mmlu_eval.run_benchmark(config)
-        results.append(result_mmlu)
     
     elif config.eval_type == 'deepemo':
         result_deepemo = deepemo.run_benchmark(config)
-        results.append(result_deepemo)
     
     elif config.eval_type == 'human_eval':
         result_human_eval = human_eval.run_benchmark(config)
-        results.append(result_human
     
     elif config.eval_type == 'mbpp':
-        pass #!TODO
+        results_mbpp = mbpp_eval.run_benchmark(config)
 
     elif config.eval_type == 'bigbench_hard':
-        pass #!TODO
+        results_bigbench_hard = bigbench_hard_eval.run_benchmark(config)
 
     elif config.eval_type == 'hellaswag':
-        pass # !TODO
-    
-    elif config.eval_type == 'drop':
-        pass # !TODO
+        results_hellaswag = hellaswag_eval.run_benchmark(config)
 
-    
+    elif config.eval_type == 'drop':
+        results_drop = drop_eval.run_benchmark(config)
+
     return results
 
 def parse_main_args():
     parser = argparse.ArgumentParser(description="Main Handler for Evaluations")
-    parser.add_argument('--eval_type', type=str, required=True, choices=['gsm', 'mmlu', 'deepemo'], help='Type of evaluation to run')
+    parser.add_argument('--eval_type', type=str, required=True, choices=['gsm', 'mmlu', 'human_eval'
+    'mbpp', 'bigbench_hard', 'hellaswag', 'drop'], help='Type of evaluation to run')
     parser.add_argument('--param1', type=str, help='Parameter 1 for the chosen evaluation')
     parser.add_argument('--param2', type=str, help='Parameter 2 for the chosen evaluation')
     # Add more common parameters if needed
@@ -45,6 +41,6 @@ def parse_main_args():
 
 if __name__ == "__main__":
     config = parse_main_args()
-    results = run_all_benchmarks(config)
+    results = run_benchmarks(config)
     for result in results:
         print(result)

@@ -137,3 +137,5 @@ def run_humaneval_benchmark(config):
     benchmark.evaluate(model=model, k=1)
     # benchmark.evaluate(model=gpt_4, k=1)
     print(benchmark.overall_score)
+    # ideally return the score, and the log probs, and also maybe the saved evals
+    return benchmark.overall_score, benchmark.predictions
