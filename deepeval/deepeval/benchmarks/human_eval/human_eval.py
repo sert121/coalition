@@ -102,7 +102,7 @@ class HumanEval(DeepEvalBaseBenchmark):
             c = 0
             # print("the functions are :", functions)
             for function in functions:
-                function = self.clean_function_code(function)
+                # function = self.clean_function_code(function)
                 try:
                     exec(function)
                     exec(golden.expected_output)

@@ -7,12 +7,13 @@ class HumanEvalTemplate:
 
     @staticmethod
     def generate_output(input: str, task: HumanEvalTask):
-
         prompt = "Complete the following function.\n"
-        prompt += input
         prompt += "Only output the function with the following entry_point: `{ep}` in string format.".format(
             ep=task.value
         )
         prompt += "Make sure your output begins with 'def'. No explanations needed. Do not format as markdown (such as *```python ... ```*)."
+        prompt += "Please follow the above instructions correctly, dont return additional explanations"
+        prompt += input
+        prompt += "\n Model output:"
 
         return prompt
