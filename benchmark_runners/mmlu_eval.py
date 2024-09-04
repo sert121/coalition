@@ -9,9 +9,16 @@ import torch
 import vllm
 
 
+from huggingface_hub import snapshot_download
+from vllm import SamplingParams
+
 
 class CustomLM(DeepEvalBaseLLM):
-    def __init__(self, model_name="meta-llama/Meta-Llama-3-8B-Instruct"):
+
+    def __init__(self,
+                 model_name="meta-llama/Meta-Llama-3-8B-Instruct",
+                 lora_path=None):  
+
         # load quantization config from json if any !TODO
         # just take the quantized model path (assume the model is already quantized)
 
@@ -67,7 +74,7 @@ class CustomLM(DeepEvalBaseLLM):
 
 def run_mmlu_benchmark(config):
     # parse and load the config !TODO
-    config = _
+    # config = _
 
     # Define benchmark with specific tasks and number of code generations
     benchmark = MMLU(
@@ -79,6 +86,6 @@ def run_mmlu_benchmark(config):
     print(benchmark.overall_score)
     print("saving benchmark predictions to csv")
     df = benchmark.predictions
-    df.to_csv('truthfulqa_benchmark_predictions.csv')
+    df.to_csv('mmlu_benchmark_predictions.csv')
 
     return benchmark.overall_score, benchmark.predictions

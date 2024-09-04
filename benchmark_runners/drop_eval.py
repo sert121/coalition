@@ -1,6 +1,5 @@
-from deepeval.benchmarks import TruthfulQA
-from deepeval.benchmarks.tasks import TruthfulQATask
-from deepeval.benchmarks.modes import TruthfulQAMode
+from deepeval.benchmarks import DROP
+from deepeval.benchmarks.tasks import DROPTask
 
 
 

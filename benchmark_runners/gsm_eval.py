@@ -7,6 +7,8 @@ import transformers
 import torch
 import vllm
 
+from vllm import SamplingParams
+
 # Define benchmark with specific tasks and number of code generations
 # take user input
 # adapt the benchmark outputs !TODO
@@ -14,8 +16,9 @@ import vllm
 
 class CustomLM(DeepEvalBaseLLM):
 
-    def __init__(self, model_name="meta-llama/Meta-Llama-3-8B-Instruct"):
-        # load quantization config from json if any !TODO
+    def __init__(self,
+                 model_name="meta-llama/Meta-Llama-3-8B-Instruct",
+                 lora_path=None):        # load quantization config from json if any !TODO
         # just take the quantized model path (assume the model is already quantized)
 
         self.model_name = model_name
