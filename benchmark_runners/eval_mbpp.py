@@ -256,12 +256,12 @@ def eval_mbpp(
     # !TODO: clean this up and make it more modular i.e that it can automatically detect the model name and path
 
 
+
+
     # generate the mbpp file/results
-
-
     parser = argparse.ArgumentParser(description="Eval model")
-    # parser.add_argument('--model_name', type=str, default='codellama/CodeLlama-7b-Instruct-hf')
-    parser.add_argument('--model_name', type=str, default='openai/gpt3.5-turbo')
+    parser.add_argument('--model_name', type=str, default='codellama/CodeLlama-7b-Instruct-hf')
+    # parser.add_argument('--model_name', type=str, default='openai/gpt3.5-turbo')
     parser.add_argument('--result_path', type=str, default="./results/codellama/mbpp_CodeLlama-7b-Instruct-hf_100.jsonl")
     # parser.add_argument('--result_path', type=str, default="./results/openai/mbpp_gpt3.5-turbo_100.jsonl")
     # parser.add_argument('--result_path', type=str, default="./results/openai/mbpp_oneshot_steps_gpt3.5-turbo_100.jsonl")

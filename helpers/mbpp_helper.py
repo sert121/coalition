@@ -13,7 +13,7 @@ import os
 import torch
 import json
 
-
+import vllm
 
 def load_data_mbpp():
     dataset_name = 'mbpp'
@@ -60,13 +60,12 @@ def run_eval_mbpp(
     tokenizer: PreTrainedTokenizer,
     num_samples_per_task: int,
     out_path: str,
-    generate_batch_completion: BatchGenerator,
+    generate_batch_completion,
     length: int, #number of problems
     format_tabs: bool = False,
 ):
     # TODO: cleanup this function and merge this with the caller functions that calls run eval mbpp oOR maybe get rid of the generate batch function completely and switch it out with vllm code
 
-    prompter = Prompter("")
     task_ids, instructions = load_data_mbpp()
     # problems = [prompter.generate_prompt(instruction) for instruction in instructions] # uncoment if not using gpt
     problems = instructions  # comment if not using gpt
@@ -224,9 +223,9 @@ def generate_batch_completion(model: vllm.LLM, tokenizer: PreTrainedTokenizer,
     # extract the model outputs
     generated_text = batch_completions[0].outputs[0].text
 
-    batch_completions = tokenizer.batch_decode([ids for ids in generated_ids],
-                                               skip_special_tokens=True,
-                                               ignore_tokenization_space=True)
+    # batch_completions = tokenizer.batch_decode([ids for ids in generated_ids],
+    #                                            skip_special_tokens=True,
+    #                                            ignore_tokenization_space=True)
 
     batch_completions = [
         output.outputs[0].text for output in batch_completions
