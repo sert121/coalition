@@ -10,12 +10,37 @@ from transformers import (
     PreTrainedTokenizer,
 )
 
-import tqdm
+from typing import Dict, Iterable
+
+from tqdm import tqdm
 import os
 import torch
 import json
 
 import vllm
+from huggingface_hub import snapshot_download
+from vllm import SamplingParams
+
+
+
+def write_jsonl(filename: str, data: Iterable[Dict], append: bool = False):
+    """
+    Writes an iterable of dictionaries to jsonl
+    """
+    if append:
+        mode = 'ab'
+    else:
+        mode = 'wb'
+    filename = os.path.expanduser(filename)
+    if filename.endswith(".gz"):
+        with open(filename, mode) as fp:
+            with gzip.GzipFile(fileobj=fp, mode='wb') as gzfp:
+                for x in data:
+                    gzfp.write((json.dumps(x) + "\n").encode('utf-8'))
+    else:
+        with open(filename, mode) as fp:
+            for x in data:
+                fp.write((json.dumps(x) + "\n").encode('utf-8'))
 
 
 def create_mbpp_instruction(example):
@@ -96,6 +121,8 @@ def run_eval_mbpp(
     generate_batch_completion,
     length: int, #number of problems
     format_tabs: bool = False,
+    lora_enabled: bool = False,
+    max_tokens: int = 100,
 ):
     # TODO: cleanup this function and merge this with the caller functions that calls run eval mbpp oOR maybe get rid of the generate batch function completely and switch it out with vllm code
 
@@ -106,6 +133,10 @@ def run_eval_mbpp(
     samples = []
     pbar = tqdm(total=len(problems) * num_samples_per_task)
 
+    #regulate this using config
+    sampling_params = SamplingParams(temperature=0, max_tokens=max_tokens)
+
+    # TODOL: add lora request
     counter = 0
     for i, prompt in enumerate(problems):
         # if format_tabs:
@@ -113,9 +144,10 @@ def run_eval_mbpp(
         # else:
         #     prompt = problems[task_ids[i]]["prompt"]
 
-        batch_completions = generate_batch_completion(model, tokenizer, prompt,
-                                                      num_samples_per_task,
-                                                      counter)
+        batch_completions = generate_batch_completion(model=model, tokenizer=tokenizer, prompt=prompt,
+                                                      sampling_params = sampling_params,
+                                                    num_samples_per_task=num_samples_per_task,
+                                                        lora_enabled=False, counter=counter)
         # print (batch_completions)
         for sample in batch_completions:
             result = dict(
@@ -145,22 +177,23 @@ def load_json(file_path="./mbpp_examples_magicoder_reform_v1.json"):
     return list_prompts
 
 
-def generate_batch_completion(model: vllm.LLM, tokenizer: PreTrainedTokenizer,
-                              prompt, sampling_params, lora_enabled,
-                              lora_request, batch_size, counter) -> list[str]:
+def generate_batch_completion(model, tokenizer,prompt,
+                              num_samples_per_task,
+                             sampling_params, lora_enabled,
+                             counter, lora_request = None, filter_use = True) -> list[str]:
     # to account for mbpp -delay , mbpp starts testing on samples from 10th sample onwards
     counter = counter + 10
-    filter_code = True
+    
     # change this completely. switch to vllm
-    input_batch = [prompt for _ in range(batch_size)]
+    input_batch = [prompt for _ in range(num_samples_per_task)]
 
     # generate the model output
-    if self.lora_enabled:
-        batch_completions = model.generate(input_batch, self.sampling_params,
-                                           self.lora_request)
+    if lora_enabled:
+        batch_completions = model.generate(input_batch, sampling_params,
+                                           lora_request)
     else:
         print("-- prompt input:-- \n", input_batch[0])
-        batch_completions = model.generate(prompt, self.sampling_params)
+        batch_completions = model.generate(prompt, sampling_params)
 
         print(" -- prompt output: --\n", batch_completions[0].outputs[0].text)
         print(" === end of prompt output === ")
@@ -170,7 +203,7 @@ def generate_batch_completion(model: vllm.LLM, tokenizer: PreTrainedTokenizer,
     batch_completions = [
         output.outputs[0].text for output in batch_completions
     ]
-    if filter_code:
+    if filter_use:
         batch_completions = [
             filter_code(completion) for completion in batch_completions
         ]
@@ -207,6 +240,12 @@ if __name__ == "__main__":
     # switch to vllm model
     model = vllm.LLM(args.model_name)
 
-
-    run_eval_mbpp(model, tokenizer, num_samples_per_task, out_path,
-                  generate_batch_completion, args.length, True)
+    run_eval_mbpp(
+        model=model,
+        tokenizer=tokenizer,
+        num_samples_per_task=num_samples_per_task,
+        out_path=out_path,
+        generate_batch_completion=generate_batch_completion,
+        length=args.length,  #number of problems
+        format_tabs=True,
+        lora_enabled=False)
