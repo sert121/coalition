@@ -9,11 +9,69 @@ from transformers import (
     PreTrainedModel,
     PreTrainedTokenizer,
 )
+
+from typing import Dict, Iterable
+
+from tqdm import tqdm
 import os
 import torch
 import json
 
+import vllm
+from huggingface_hub import snapshot_download
+from vllm import SamplingParams
 
+
+
+def write_jsonl(filename: str, data: Iterable[Dict], append: bool = False):
+    """
+    Writes an iterable of dictionaries to jsonl
+    """
+    if append:
+        mode = 'ab'
+    else:
+        mode = 'wb'
+    filename = os.path.expanduser(filename)
+    if filename.endswith(".gz"):
+        with open(filename, mode) as fp:
+            with gzip.GzipFile(fileobj=fp, mode='wb') as gzfp:
+                for x in data:
+                    gzfp.write((json.dumps(x) + "\n").encode('utf-8'))
+    else:
+        with open(filename, mode) as fp:
+            for x in data:
+                fp.write((json.dumps(x) + "\n").encode('utf-8'))
+
+
+def create_mbpp_instruction(example):
+    description = example["text"]
+    test_cases = example["test_list"]
+    prompt = "You are an expert Python programmer, and you need to respond with code to complete is your task: {description} Your code should pass these tests:\n\n{tests}\n."
+
+    # prompt = "You are an expert Python programmer, and you need to respond with code to complete is your task. Your code should pass certain tests. You shall also be provided with some steps to help you solve the problem.  \n Task: {description}. \n Tests: \n\n{tests}\n."
+    # prompt = "Task:\n{description}\nTests:\n{tests}\n." # comment if not using gpt
+
+    #prompt modified for mbpp codellama
+    # prompt =  " Remember to respond with only the function definition, nothing else. \nTask: {description} \nTests:\n {tests}\nCode:"
+    # prompt =  "You are an expert Python programmer, and you need to respond with code to complete is your task. "
+
+    #promptfor mbpp codellama (zero-shot steps)
+    # prompt = " Remember to respond with only the function definition, nothing else. You shall be provided steps to generate more accurate code. \nTask: {description} \nTests:\n {tests}"
+
+    # prompt for mbpp codellama (one shot steps)
+    # prompt = " Remember to respond with only the function definition, nothing else. You shall be provided steps to generate more accurate code. You are provided an example to understand the structure. \nTask: {description} \nTests:\n {tests}"
+
+    #prompt for mbpp codellama (zero shot pseudo code)
+    # prompt = " Remember to respond with only the function definition, nothing else. You shall be provided pseudocode to generate more accurate code. \nTask: {description} \nTests:\n {tests}"
+
+    # prompt for mbpp codellama (one shot pseudo code)
+    # prompt = " Remember to respond with only the function definition, nothing else. You shall be provided pseudocode to generate more accurate code. You are provided an example to understand the structure. \nTask: {description} \nTests:\n {tests}"
+
+    # prompt = : "You are an expert Python programmer, and you need to respond with code to complete the following task. Remember to respond with only the function definition, nothing else. You shall be provided pseudocode to generate more accurate code. You are provided an example to understand the structure. \nTask: {description} \nTests:\n {tests}"
+
+    instruction = prompt.format(description=description,
+                                tests="\n".join(test_cases))
+    return instruction
 
 def load_data_mbpp():
     dataset_name = 'mbpp'
@@ -60,13 +118,14 @@ def run_eval_mbpp(
     tokenizer: PreTrainedTokenizer,
     num_samples_per_task: int,
     out_path: str,
-    generate_batch_completion: BatchGenerator,
+    generate_batch_completion,
     length: int, #number of problems
     format_tabs: bool = False,
+    lora_enabled: bool = False,
+    max_tokens: int = 100,
 ):
     # TODO: cleanup this function and merge this with the caller functions that calls run eval mbpp oOR maybe get rid of the generate batch function completely and switch it out with vllm code
 
-    prompter = Prompter("")
     task_ids, instructions = load_data_mbpp()
     # problems = [prompter.generate_prompt(instruction) for instruction in instructions] # uncoment if not using gpt
     problems = instructions  # comment if not using gpt
@@ -74,6 +133,10 @@ def run_eval_mbpp(
     samples = []
     pbar = tqdm(total=len(problems) * num_samples_per_task)
 
+    #regulate this using config
+    sampling_params = SamplingParams(temperature=0, max_tokens=max_tokens)
+
+    # TODOL: add lora request
     counter = 0
     for i, prompt in enumerate(problems):
         # if format_tabs:
@@ -81,9 +144,10 @@ def run_eval_mbpp(
         # else:
         #     prompt = problems[task_ids[i]]["prompt"]
 
-        batch_completions = generate_batch_completion(model, tokenizer, prompt,
-                                                      num_samples_per_task,
-                                                      counter)
+        batch_completions = generate_batch_completion(model=model, tokenizer=tokenizer, prompt=prompt,
+                                                      sampling_params = sampling_params,
+                                                    num_samples_per_task=num_samples_per_task,
+                                                        lora_enabled=False, counter=counter)
         # print (batch_completions)
         for sample in batch_completions:
             result = dict(
@@ -113,124 +177,36 @@ def load_json(file_path="./mbpp_examples_magicoder_reform_v1.json"):
     return list_prompts
 
 
-# ZERO SHOT + STEPS
-def construct_codellama_prompt(problem, thought):
-    problem = problem.split('[/INST]')[0]
-    PROMPT = f'{problem} \nSteps:\n {thought} \nCode:[/INST]'
-    return PROMPT
-
-
-# ZERO SHOT + PSEUDOCODE
-def construct_codellama_pseudo_prompt(problem, thought):
-    problem = problem.split('[/INST]')[0]
-    PROMPT = f'{problem} \nPseudocode:\n {thought} \nCode:\n[/INST]'
-    return PROMPT
-
-
-
-# ONE SHOT + PSSEUDOCODE
-def construct_codellama_pseudo_prompt_example(problem, thought):
-    problem = problem.split('[/INST]')[0]
-    example = '''
-    EXAMPLE STARTS HERE
-        Task: Write a program that extracts all substrings of length n from a given string.
-        Tests:
-        assert find_substrings("abc", 2) == ["ab", "bc"]
-        assert find_substrings("abc", 3) == ["abc"]
-        assert find_substrings("abc", 4) == []
-        
-        Pseudocode:
-        function extract_substrings(string, n)
-            # Initialize an empty list for substrings
-            Initialize substrings as an empty list
-
-            # Loop from start to the point where substring of length n can be extracted
-            for every index in the string
-                # Add substring of length n to the list
-                append string[i:i + n] to substrings
-
-            # Return the list of substrings
-            return the substrings
-        Code:
-        def find_substrings(string, n):
-            substrings = []
-            for i in range(len(string) - n + 1):
-                substrings.append(string[i:i + n])
-            return substrings
-    EXAMPLE ENDS HERE
-    '''
-
-    # used for benchmarking
-    PROMPT = example + f'{problem} \nPseudocode:\n{thought} \nCode:\n[/INST]'
-
-    # v2 used for experimentation
-    PROMPT = f'{problem}\n {example} \nPseudocode:\n{thought} \nCode:\n[/INST]'
-    return PROMPT
-
-
-
-# ONE SHOT  + STEPS PROMPT
-def construct_codellama_prompt_steps(problem, thought):
-    problem = problem.split('[/INST]')[0]
-    example = '''
-EXAMPLE STARTS HERE
-    Task: Write a program that extracts all substrings of length n from a given string.
-    Tests:
-    assert find_substrings("abc", 2) == ["ab", "bc"]
-    assert find_substrings("abc", 3) == ["abc"]
-    assert find_substrings("abc", 4) == []
-    
-    Steps:
-    1. Initialize an empty list for substrings
-    2. Loop from start to the point where substring of length n can be extracted
-        a. Add substring of length n to the list
-    3. Return the final list of substrings that was created
-    Code:
-    def find_substrings(string, n):
-        substrings = []
-        for i in range(len(string) - n + 1):
-            substrings.append(string[i:i + n])
-        return substrings
-EXAMPLE ENDS HERE     
-'''
-    PROMPT = example + \
-        f'{problem} \nSteps:\n {thought} \nCode:\n[/INST]'  # v1 that is used in baselines
-
-    # v2
-    PROMPT = f'{problem}\n {example} \nSteps:\n {thought} \nCode:\n[/INST]'
-
-    return PROMPT
-
-
-def generate_batch_completion(model: vllm.LLM, tokenizer: PreTrainedTokenizer,
-                              prompt, sampling_params, lora_enabled,
-                              lora_request, batch_size, counter) -> list[str]:
+def generate_batch_completion(model, tokenizer,prompt,
+                              num_samples_per_task,
+                             sampling_params, lora_enabled,
+                             counter, lora_request = None, filter_use = True) -> list[str]:
     # to account for mbpp -delay , mbpp starts testing on samples from 10th sample onwards
     counter = counter + 10
-
+    
     # change this completely. switch to vllm
-    input_batch = [prompt for _ in range(batch_size)]
+    input_batch = [prompt for _ in range(num_samples_per_task)]
 
     # generate the model output
-    if self.lora_enabled:
-        batch_completions = model.generate(input_batch, self.sampling_params,
-                                           self.lora_request)
+    if lora_enabled:
+        batch_completions = model.generate(input_batch, sampling_params,
+                                           lora_request)
     else:
         print("-- prompt input:-- \n", input_batch[0])
-        batch_completions = model.generate(prompt, self.sampling_params)
+        batch_completions = model.generate(prompt, sampling_params)
 
         print(" -- prompt output: --\n", batch_completions[0].outputs[0].text)
         print(" === end of prompt output === ")
+
     # extract the model outputs
     generated_text = batch_completions[0].outputs[0].text
-
-    batch_completions = tokenizer.batch_decode([ids for ids in generated_ids],
-                                               skip_special_tokens=True,
-                                               ignore_tokenization_space=True)
-
     batch_completions = [
         output.outputs[0].text for output in batch_completions
     ]
+    if filter_use:
+        batch_completions = [
+            filter_code(completion) for completion in batch_completions
+        ]
 
     return batch_completions
 
@@ -240,8 +216,10 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Eval model")
     # parser.add_argument('--model_name', type=str, default='codellama/CodeLlama-34b-Instruct-hf') # uncomment this line for 34b model
 
-    parser.add_argument('--model_name', type=str,
-                        default='codellama/CodeLlama-7b-Instruct-hf')    # uncomment this line for 7b model
+    parser.add_argument('--model_name',
+                        type=str,
+                        default='codellama/CodeLlama-7b-Instruct-hf'
+                        )  # uncomment this line for 7b model
     parser.add_argument('--length', type=int, default=100)
     args = parser.parse_args()
     print(args)
@@ -249,25 +227,25 @@ if __name__ == "__main__":
     num_samples_per_task = 5
 
     # output path
-    out_path = "results/" + args.model_name.split('/')[0] + "/mbpp_" + args.model_name.split('/')[
-        1] + '_' + str(args.length) + ".jsonl"
+    out_path = "results/" + args.model_name.split(
+        '/')[0] + "/mbpp_" + args.model_name.split('/')[1] + '_' + str(
+            args.length) + ".jsonl"
     print("Out path: ", out_path)
     os.makedirs("results/" + args.model_name.split('/')[0], exist_ok=True)
 
     print("Loading tokenizer...")
-    tokenizer = AutoTokenizer.from_pretrained(
-        args.model_name,
-    )
+    tokenizer = AutoTokenizer.from_pretrained(args.model_name)
 
     print("Loading model...")
-    model = torch.compile(
-        AutoModelForCausalLM.from_pretrained(
-            args.model_name,
-            torch_dtype=torch.bfloat16,
-        )
-        .eval()
-        .to("cuda")
-    )
+    # switch to vllm model
+    model = vllm.LLM(args.model_name)
 
-    run_eval_mbpp(model, tokenizer, num_samples_per_task, out_path,
-                  generate_batch_completion, args.length, True)
+    run_eval_mbpp(
+        model=model,
+        tokenizer=tokenizer,
+        num_samples_per_task=num_samples_per_task,
+        out_path=out_path,
+        generate_batch_completion=generate_batch_completion,
+        length=args.length,  #number of problems
+        format_tabs=True,
+        lora_enabled=False)

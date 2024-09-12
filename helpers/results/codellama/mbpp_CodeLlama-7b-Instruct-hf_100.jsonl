@@ -1,0 +1,100 @@
+{"task_id": 11, "trg_prediction": ".\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n."}
+{"task_id": 12, "trg_prediction": ".\n.\nassert sort_matrix([[1, 2, 3], [2, 4, 5], [1, 1, 1]])==[[1, 1, 1], [1, 2, 3], [2, 4, 5]]\nassert sort_matrix([[1, 2, 3], [-2, 4, -5], [1, -1, 1]])==[["}
+{"task_id": 13, "trg_prediction": ".\n."}
+{"task_id": 14, "trg_prediction": ".\n.\nassert find_Volume(10,10,10) == 1000"}
+{"task_id": 15, "trg_prediction": ".\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n."}
+{"task_id": 16, "trg_prediction": ".\n.\nassert text_lowercase_underscore(\"aab_cbbbc\")==('Found a match!')"}
+{"task_id": 17, "trg_prediction": ".\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n."}
+{"task_id": 18, "trg_prediction": ".\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n."}
+{"task_id": 19, "trg_prediction": ".\n.\nassert test_duplicate([1,2,3,4,5,6,7,8,9,10])==False"}
+{"task_id": 20, "trg_prediction": ".\n.\nassert is_woodall(1000000000) == False"}
+{"task_id": 21, "trg_prediction": ".\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n."}
+{"task_id": 22, "trg_prediction": ".\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n."}
+{"task_id": 23, "trg_prediction": ".\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n."}
+{"task_id": 24, "trg_prediction": ".\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n."}
+{"task_id": 25, "trg_prediction": ".\n.\nassert find_Product([1,1,1,1,1],1) == 1"}
+{"task_id": 26, "trg_prediction": ".\n.\nassert check_k_elements([(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, "}
+{"task_id": 27, "trg_prediction": ".\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n."}
+{"task_id": 28, "trg_prediction": ".\n.\nassert binomial_Coeff(10,5) == 252"}
+{"task_id": 29, "trg_prediction": ".\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n."}
+{"task_id": 30, "trg_prediction": ".\n.\nassert count_Substring_With_Equal_Ends(\"abcdabcd\") == 12"}
+{"task_id": 31, "trg_prediction": ".\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n."}
+{"task_id": 32, "trg_prediction": ".\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n."}
+{"task_id": 33, "trg_prediction": ".\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n."}
+{"task_id": 34, "trg_prediction": ".\n.\nassert find_missing([1,2,3,5,6,7,8,9,10],5) == 4"}
+{"task_id": 35, "trg_prediction": ".\n.\nassert find_rect_num(10) == 100"}
+{"task_id": 36, "trg_prediction": ".\n.\nassert find_Nth_Digit(100,1000,100) == 1"}
+{"task_id": 37, "trg_prediction": ".\n.\nassert sort_mixed_list([19,'red',12,'green','blue', 10,'white','green',1])==[1, 10, 12, 19, 'blue', 'green', 'green', 'red', 'white']"}
+{"task_id": 38, "trg_prediction": ".\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n."}
+{"task_id": 39, "trg_prediction": ".\n.\nassert rearange_string(\"abcd\")==('abcd')\nassert rearange_string(\"\")==('')"}
+{"task_id": 40, "trg_prediction": ".\n."}
+{"task_id": 41, "trg_prediction": ".\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n."}
+{"task_id": 42, "trg_prediction": ".\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n."}
+{"task_id": 43, "trg_prediction": ".\n.\nassert text_match(\"aab_cbbbc\") == 'Found a match!'\nassert text_match(\"aab_Abbbc\") == 'Not matched!'\nassert text_match(\"Aaab_abbbc\") == 'Not matched!'"}
+{"task_id": 44, "trg_prediction": ".\n.\nassert text_match_string(\"  lang\")==('Not matched!')\nassert text_match_string(\"  lang\")==('Not matched!')\nassert text_match_string(\"  lang\")==('Not matched!')\nassert text_match_string(\"  lang\")==('Not matched!')\nassert text_match_string(\"  lang\")==('Not matched!')\nassert text_match_string(\"  lang\")"}
+{"task_id": 45, "trg_prediction": ".\n.\nassert get_gcd([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) == 1"}
+{"task_id": 46, "trg_prediction": ".\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n."}
+{"task_id": 47, "trg_prediction": ".\n.\nassert compute_Last_Digit(1000000000,1000000000) == 1"}
+{"task_id": 48, "trg_prediction": ".\n.\nassert odd_bit_set_number(100) == 101"}
+{"task_id": 49, "trg_prediction": ".\n.\nassert specified_element([[1, 2, 3, 2], [4, 5, 6, 2], [7, 1, 9, 5]],3)==[2,2,5]"}
+{"task_id": 50, "trg_prediction": ".\n.\nassert min_length_list([[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]])==(1,[1,2,3,4,5,6,7,8,9,10,11,12,13,14"}
+{"task_id": 51, "trg_prediction": ".\n.\nassert check_equilateral(12,12,12)==True"}
+{"task_id": 52, "trg_prediction": ".\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n."}
+{"task_id": 53, "trg_prediction": ".\n.\nassert check_Equality(\"\") == \"Not Equal\""}
+{"task_id": 54, "trg_prediction": ".\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n."}
+{"task_id": 55, "trg_prediction": ".\n.\nassert tn_gp(1,100,10)==100000000000000000000000000000000000000000000000000000000000000000000000000000"}
+{"task_id": 56, "trg_prediction": ".\n.\nassert check(123456789) == False"}
+{"task_id": 57, "trg_prediction": ".\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n."}
+{"task_id": 58, "trg_prediction": ".\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n."}
+{"task_id": 59, "trg_prediction": ".\n.\nassert is_octagonal(100) == 12800"}
+{"task_id": 60, "trg_prediction": ".\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n."}
+{"task_id": 61, "trg_prediction": ".\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n."}
+{"task_id": 62, "trg_prediction": ".\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n."}
+{"task_id": 63, "trg_prediction": ".\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n."}
+{"task_id": 64, "trg_prediction": ".\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n."}
+{"task_id": 65, "trg_prediction": ".\n.\nassert recursive_list_sum(([100, 200, [300,400],[500,600]]))==1500"}
+{"task_id": 66, "trg_prediction": ".\n.\nassert pos_count([-1,-2,-3,-4]) == 0"}
+{"task_id": 67, "trg_prediction": ".\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n."}
+{"task_id": 68, "trg_prediction": ".\n.\nassert is_Monotonic([1, 2, 4, 5, 6]) == True"}
+{"task_id": 69, "trg_prediction": ".\n.\nassert is_sublist([2,4,3,5,7],[2,4,3,5,7])==True"}
+{"task_id": 70, "trg_prediction": ".\n.\nassert get_equal([(1, 2, 3, 4, 5), (6, 7, 8, 9, 10)], 5) == 'All tuples have same length'\nassert get_equal([(1, 2, 3, 4, 5), (6, 7, 8, 9)], 5) == 'All tuples do not have same"}
+{"task_id": 71, "trg_prediction": ".\n.\nassert comb_sort([1, 2, 3, 4, 5]) == [1, 2, 3, 4, 5]\nassert comb_sort([5, 4, 3, 2, 1]) == [1, 2, 3, 4, 5]"}
+{"task_id": 72, "trg_prediction": ".\n.\nassert dif_Square(100) == False"}
+{"task_id": 73, "trg_prediction": ".\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n."}
+{"task_id": 74, "trg_prediction": ".\n.\nassert is_samepatterns([\"red\",\"green\",\"greenn\"], [\"a\",\"b\",\"b\",\"a\"])==False \nassert is_samepatterns([\"red\",\"green\",\"greenn\"], [\"a\",\"b\",\"b\",\"a\",\"a\"])==True \nassert is_samepatterns([\"red\",\"green\",\"greenn\"], [\"a\",\"b\",\"b\",\"a\",\"a\",\"a\"])==False \n.\n.\n."}
+{"task_id": 75, "trg_prediction": ".\n."}
+{"task_id": 76, "trg_prediction": ".\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n."}
+{"task_id": 77, "trg_prediction": ".\n.\nassert is_Diff(123456789) == False"}
+{"task_id": 78, "trg_prediction": ".\n.\nassert count_With_Odd_SetBits(100) == 25"}
+{"task_id": 79, "trg_prediction": ".\n.\nassert word_len(\"\") == False"}
+{"task_id": 80, "trg_prediction": ".\n.\nassert tetrahedral_number(10) == 165.0"}
+{"task_id": 81, "trg_prediction": ".\n.\nassert zip_tuples((1, 2, 3, 4, 5, 6),(7, 8, 9) ) == [(1, 7), (2, 8), (3, 9), (4, 7), (5, 8), (6, 9)]\nassert zip_tuples((2, 3, 4, 5, 6, 7),(8,"}
+{"task_id": 82, "trg_prediction": ".\n.\nassert volume_sphere(100)==26123.793478477623"}
+{"task_id": 83, "trg_prediction": ".\n.\nassert get_Char(\"z\") == \"z\""}
+{"task_id": 84, "trg_prediction": ".\n.\nassert sequence(100) == 154"}
+{"task_id": 85, "trg_prediction": ".\n.\nassert surfacearea_sphere(100)==25032.96941264143"}
+{"task_id": 86, "trg_prediction": ".\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n."}
+{"task_id": 87, "trg_prediction": ".\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n."}
+{"task_id": 88, "trg_prediction": ".\n."}
+{"task_id": 89, "trg_prediction": ".\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n."}
+{"task_id": 90, "trg_prediction": ".\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n."}
+{"task_id": 91, "trg_prediction": ".\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n."}
+{"task_id": 92, "trg_prediction": ".\n.\nassert is_undulating(\"12121212121212121212121212121212121212121212121212121212121212121212121212121212121212121"}
+{"task_id": 93, "trg_prediction": ".\n.\nassert power(10,10) == 10000000000"}
+{"task_id": 94, "trg_prediction": ".\n.\nassert index_minimum([('Rahul', 125), ('Raj', 150), ('Rohan', 175)]) == 'Raj'\nassert index_minimum([('Rajesh', 125), ('Raj', 150), ('Rohan', 175)]) == 'Raj'\nassert index_minimum([('Raj', "}
+{"task_id": 95, "trg_prediction": ".\n.\nassert Find_Min_Length([[1,2,3,4,5,6,7,8,9,10],[1,2,3,4,5,6,7,8,9,10,11]]) == 10"}
+{"task_id": 96, "trg_prediction": ".\n.\nassert divisor(1) == 1\nassert divisor(0) == 0"}
+{"task_id": 97, "trg_prediction": ".\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n."}
+{"task_id": 98, "trg_prediction": ".\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n."}
+{"task_id": 99, "trg_prediction": ".\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n."}
+{"task_id": 100, "trg_prediction": ".\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n."}
+{"task_id": 101, "trg_prediction": ".\n.\nassert kth_element([1,2,3,4,5], 5, 5) == 5\nassert kth_element([1,2,3,4,5], 5, 1) == 1\nassert kth_element([1,2,3,4,5], 5, 3) == 3"}
+{"task_id": 102, "trg_prediction": ".\n.\nassert snake_to_camel('python_is_fun')==('PythonIsFun')"}
+{"task_id": 103, "trg_prediction": ".\n.\nassert eulerian_num(10, 1) == 10"}
+{"task_id": 104, "trg_prediction": ".\n."}
+{"task_id": 105, "trg_prediction": ".\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n."}
+{"task_id": 106, "trg_prediction": ".\n.\nassert add_lists([10, 11, 12], (20, 21)) == (20, 21, 10, 11, 12)\nassert add_lists([11, 12, 13], (21, 22)) == (21, 22, 11, 12, 13)\nassert add_"}
+{"task_id": 107, "trg_prediction": ".\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n."}
+{"task_id": 108, "trg_prediction": ".\n.\nassert merge_sorted_list([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 2"}
+{"task_id": 109, "trg_prediction": ".\n.\nassert odd_Equivalent(\"11111111111111111111111111111111\",100) == 50"}
+{"task_id": 110, "trg_prediction": ".\n."}
