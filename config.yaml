@@ -1,0 +1,35 @@
+global:
+  output_dir: "./results"
+  log_level: "info"
+  random_seed: 42
+
+mmlu:
+  temperature:1
+  num_questions: 100
+  model: "gpt-4"
+  few_shot_examples: 5
+
+humaneval:
+  temperature: 0.7
+  max_tokens: 512
+  num_samples_per_task: 200
+  timeout: 30  # seconds
+
+mbpp:
+  num_samples: 150
+
+drop:
+  model: "gpt-3.5-turbo"
+  max_context_length: 2048
+  num_beams: 5
+
+hellaswag:
+  num_choices: 5
+  batch_size: 32
+  max_seq_length: 128
+
+custom_benchmark:
+  name: "my_custom_test"
+  parameters:
+    param1: "value1"
+    param2: 42

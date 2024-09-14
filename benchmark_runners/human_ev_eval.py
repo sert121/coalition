@@ -127,11 +127,9 @@ class CustomLM(DeepEvalBaseLLM):
 
 def run_humaneval_benchmark(config):
     # parse and load the config !TODO
-
     # Define benchmark with specific tasks and number of code generations
-    benchmark = HumanEval(
-        n=1 # take n from user
-    )
+    benchmark = HumanEval(n=1  # take n from user
+                          )
 
     model = CustomLM(model_name='meta-llama/Meta-Llama-3-8B-Instruct')
     benchmark.evaluate(model=model, k=1)
