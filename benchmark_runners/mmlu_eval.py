@@ -74,7 +74,7 @@ class CustomLM(DeepEvalBaseLLM):
 
 def run_mmlu_benchmark(config):
     # parse and load the config !TODO
-    # config = _
+    
 
     # Define benchmark with specific tasks and number of code generations
     benchmark = MMLU(

@@ -14,30 +14,42 @@ from vllm import SamplingParams
 # adapt the benchmark outputs !TODO
 
 
-class CustomLM(DeepEvalBaseLLM):
+class GSM_Custom_LM(DeepEvalBaseLLM):
 
-    def __init__(self,
-                 model_name="meta-llama/Meta-Llama-3-8B-Instruct",
-                 lora_path=None):        # load quantization config from json if any !TODO
+    def __init__(
+            self,
+            config=None,
+            model_name="meta-llama/Meta-Llama-3-8B-Instruct",
+            lora_path=None):
         # just take the quantized model path (assume the model is already quantized)
 
+        self.config = config
         self.model_name = model_name
-        # load the sampling params
-        self.sampling_params = SamplingParams(temperature=0, max_tokens=50)
 
+        self.sampling_params = SamplingParams(
+        **config.sampling_params, logprobs=1)
+            
+            
         # load lora config from json if any !TODO
-        # if the lora adapters are present, take the path
+
         if lora_path is not None:
-            adapter_lora_path = snapshot_download(repo_id=sql_lora_path)
-            llm = vllm.LLM(model=model_name, enable_lora=True)
-            self.lora_enabled = True
-            self.lora_request = LoRARequest("lora_adapter", 1, lora)
+            try:
+                adapter_lora_path = snapshot_download(
+                    repo_id=self.config.lora_path)
+                llm = vllm.LLM(model=self.config.model_name, enable_lora=True)
+                self.lora_enabled = True
+                self.lora_request = LoRARequest("lora_adapter", 1, lora)
+            except Exception as e:
+                print(e)
+                print("Lora adapter not found, using default model")
+                llm = vllm.LLM(model=self.config.model_name)
+                self.lora_enabled = False
 
         else:
-            # insert vllm code to load model (with above c)
-            llm = vllm.LLM(model=model_name)
-            self.lora_enabled = False
-        tokenizer = AutoTokenizer.from_pretrained(model_name)
+            llm = vllm.LLM(model=self.config.model_name)
+            self.config.lora_enabled = False
+
+        tokenizer = AutoTokenizer.from_pretrained(self.config.model_name)
 
         self.model = llm
         self.tokenizer = tokenizer
@@ -70,16 +82,16 @@ class CustomLM(DeepEvalBaseLLM):
     def get_model_name(self):
         return f"{self.model_name}"
 
+
 def run_gsm_benchmark(config):
 
-    # parse the config please ! TODO
     benchmark = GSM8K(
-        n_shots = 0,
-        enable_cot = 1,
-        n_problems = 1 # number of problems
+        n_shots=config.n_shots,
+        enable_cot=config.enable_cot,
+        n_problems=config.n_problems  # number of problems
     )
 
-    benchmark.evaluate(model=CustomLM())
-    print(benchmark.overall_score)
+    benchmark.evaluate(model=GSM_Custom_LM(config))
 
+    print(benchmark.overall_score)
     return benchmark.overall_score, benchmark.predictions
