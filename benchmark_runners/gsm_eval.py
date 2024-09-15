@@ -27,7 +27,7 @@ class GSM_Custom_LM(DeepEvalBaseLLM):
         self.model_name = model_name
 
         self.sampling_params = SamplingParams(
-        **config.sampling_params, logprobs=1)
+        **(vars(config.sampling_params)), logprobs=1)
             
 
         if lora_path is not None:
@@ -45,7 +45,7 @@ class GSM_Custom_LM(DeepEvalBaseLLM):
 
         else:
             llm = vllm.LLM(model=self.config.model_name)
-            self.config.lora_enabled = False
+            self.lora_enabled = False
 
         tokenizer = AutoTokenizer.from_pretrained(self.config.model_name)
 

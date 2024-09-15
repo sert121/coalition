@@ -14,36 +14,36 @@ def dict_to_namespace(d):
         return d
 
 
-def run_benchmarks(config={}):
+def run_benchmarks(config, args):
     results = []
 
-    if config.eval_type == 'gsm':
-        config = config.gsm
+    if args.eval_type == 'gsm8k':
+        config = config.gsm8k
         result_gsm = gsm_eval.run_gsm_benchmark(config)
 
-    elif config.eval_type == 'mmlu':
+    elif args.eval_type == 'mmlu':
         config = config.mmlu
         result_mmlu = mmlu_eval.run_mmlu_benchmark(config)
 
-    elif config.eval_type == 'human_eval':
+    elif args.eval_type == 'human_eval':
         config = config.human_eval
         result_human_eval = human_eval.run_humaneval_benchmark(config)
 
-    elif config.eval_type == 'mbpp':
+    elif args.eval_type == 'mbpp':
         config = config.mbpp
         results_mbpp = mbpp_eval.run_benchmark(config)
 
-    elif config.eval_type == 'bigbench_hard':
+    elif args.eval_type == 'bigbench_hard':
         config = config.bigbench_hard
         results_bigbench_hard = bigbench_hard_eval.run_bigbench_benchmark(
             config)
 
-    elif config.eval_type == 'hellaswag':
+    elif args.eval_type == 'hellaswag':
         config = config.hellaswag
         results_hellaswag = hellaswag_eval.run_hellaswag_benchmark(config)
 
-    elif config.eval_type == 'drop':
-        config = config.drop    
+    elif args.eval_type == 'drop':
+        config = config.drop
         results_drop = drop_eval.run_drop_benchmark(config)
 
     return results
@@ -55,7 +55,7 @@ def parse_main_args():
         parser = argparse.ArgumentParser()
         parser.add_argument('--eval_type',
                             type=str,
-                            default='gsm',
+                            default='gsm8k',
                             help='Evaluation type')
 
         config = yaml.safe_load(yaml_content)
@@ -66,7 +66,7 @@ def parse_main_args():
     return config, parser.parse_args()
 
 if __name__ == "__main__":
-    config, _ = parse_main_args()
-    results = run_benchmarks(config)
-    for result in results:
-        print(result)
+    config, args = parse_main_args()
+    run_benchmarks(config, args)
+    # for result in results:
+    #     print(result)
