@@ -29,8 +29,6 @@ class GSM_Custom_LM(DeepEvalBaseLLM):
         self.sampling_params = SamplingParams(
         **config.sampling_params, logprobs=1)
             
-            
-        # load lora config from json if any !TODO
 
         if lora_path is not None:
             try:
@@ -60,6 +58,19 @@ class GSM_Custom_LM(DeepEvalBaseLLM):
     def generate(self, prompt: str) -> str:
         # generate a single prompt output
         model = self.load_model()
+        if 'llama' in self.config.model_name:
+            tokenizer = self.model.get_tokenizer()
+
+            prompt = tokenizer.apply_chat_template(
+                [{'role': 'user', 'content': f'conversations'}],
+                tokenize=False,
+            )
+            self.sampling_params = SamplingParams(
+                    ** self.config.sampling_params,
+                    logprobs=1,
+                    stop_token_ids=[self.tokenizer.eos_token_id, self.tokenizer.convert_tokens_to_ids("<|eot_id|>")],  # KEYPOINT HERE
+                ) # override the sampling params to include the stop token
+
 
         # generate the model output
         if self.lora_enabled:
@@ -71,7 +82,7 @@ class GSM_Custom_LM(DeepEvalBaseLLM):
 
             print(" -- prompt output: --\n", output[0].outputs[0].text)
             print(" === end of prompt output === ")
-        # extract the model outputs
+
         generated_text = output[0].outputs[0].text
         # return the output
         return generated_text

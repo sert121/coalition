@@ -39,9 +39,11 @@ def run_benchmarks(config={}):
             config)
 
     elif config.eval_type == 'hellaswag':
+        config = config.hellaswag
         results_hellaswag = hellaswag_eval.run_hellaswag_benchmark(config)
 
     elif config.eval_type == 'drop':
+        config = config.drop    
         results_drop = drop_eval.run_drop_benchmark(config)
 
     return results
