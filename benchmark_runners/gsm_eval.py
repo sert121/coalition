@@ -6,6 +6,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 import transformers
 import torch
 import vllm
+import gc
 
 from vllm import SamplingParams
 
@@ -16,25 +17,36 @@ from vllm import SamplingParams
 
 class GSM_Custom_LM(DeepEvalBaseLLM):
 
-    def __init__(
-            self,
-            config=None,
-            model_name="meta-llama/Meta-Llama-3-8B-Instruct",
-            lora_path=None):
+    def clear_cache(self):
+        torch.cuda.empty_cache()
+        gc.collect()
+
+    def switch_model(self):
+        if 'mistral' in self.config.model_name:
+            self.clear_cache()
+            self.model = vllm.LLM(model=self.config.model_name,
+                                  tokenizer=self.config.model_name,
+                                  enable_lora=True)
+
+    def __init__(self,
+                 config=None,
+                 model_name="meta-llama/Meta-Llama-3-8B-Instruct",
+                 lora_path=None):
         # just take the quantized model path (assume the model is already quantized)
 
         self.config = config
         self.model_name = model_name
 
-        self.sampling_params = SamplingParams(
-        **(vars(config.sampling_params)), logprobs=1)
-            
+        self.sampling_params = SamplingParams(**(vars(config.sampling_params)),
+                                              logprobs=1)
 
         if lora_path is not None:
             try:
                 adapter_lora_path = snapshot_download(
                     repo_id=self.config.lora_path)
-                llm = vllm.LLM(model=self.config.model_name, enable_lora=True)
+                llm = vllm.LLM(model=self.config.model_name, tokenizer=self.config.model_name, enable_lora=True)
+
+
                 self.lora_enabled = True
                 self.lora_request = LoRARequest("lora_adapter", 1, lora)
             except Exception as e:
@@ -44,7 +56,8 @@ class GSM_Custom_LM(DeepEvalBaseLLM):
                 self.lora_enabled = False
 
         else:
-            llm = vllm.LLM(model=self.config.model_name)
+            llm = vllm.LLM(model=self.config.model_name, tokenizer=self.config.model_name,)
+
             self.lora_enabled = False
 
         tokenizer = AutoTokenizer.from_pretrained(self.config.model_name)
@@ -58,19 +71,24 @@ class GSM_Custom_LM(DeepEvalBaseLLM):
     def generate(self, prompt: str) -> str:
         # generate a single prompt output
         model = self.load_model()
-        if 'llama' in self.config.model_name:
-            tokenizer = self.model.get_tokenizer()
 
+        if 'llama' or 'mistral' in self.config.model_name:
+            tokenizer = self.model.get_tokenizer()
             prompt = tokenizer.apply_chat_template(
-                [{'role': 'user', 'content': f'conversations'}],
+                [{
+                    'role': 'user',
+                    'content': f'{prompt}'
+                }],
                 tokenize=False,
             )
             self.sampling_params = SamplingParams(
-                    ** self.config.sampling_params,
-                    logprobs=1,
-                    stop_token_ids=[self.tokenizer.eos_token_id, self.tokenizer.convert_tokens_to_ids("<|eot_id|>")],  # KEYPOINT HERE
-                ) # override the sampling params to include the stop token
-
+                **vars(self.config.sampling_params),
+                logprobs=1,
+                stop_token_ids=[
+                    self.tokenizer.eos_token_id,
+                    self.tokenizer.convert_tokens_to_ids("<|eot_id|>")
+                ],  # KEYPOINT HERE
+            )
 
         # generate the model output
         if self.lora_enabled:
@@ -84,7 +102,6 @@ class GSM_Custom_LM(DeepEvalBaseLLM):
             print(" === end of prompt output === ")
 
         generated_text = output[0].outputs[0].text
-        # return the output
         return generated_text
 
     async def a_generate(self, prompt: str) -> str:  #!TODO: fix
