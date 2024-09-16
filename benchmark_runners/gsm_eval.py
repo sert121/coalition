@@ -15,7 +15,7 @@ from vllm import SamplingParams
 # adapt the benchmark outputs !TODO
 
 
-class GSM_Custom_LM(DeepEvalBaseLLM):
+class GSMCustomLM(DeepEvalBaseLLM):
 
     def clear_cache(self):
         torch.cuda.empty_cache()
@@ -119,7 +119,7 @@ def run_gsm_benchmark(config):
         n_problems=config.n_problems  # number of problems
     )
 
-    benchmark.evaluate(model=GSM_Custom_LM(config))
+    benchmark.evaluate(model=GSMCustomLM(config))
 
     print(benchmark.overall_score)
     return benchmark.overall_score, benchmark.predictions
