@@ -11,35 +11,50 @@ from huggingface_hub import snapshot_download
 from vllm import SamplingParams
 
 
-class CustomLM(DeepEvalBaseLLM):
+class HumanEvalCustomLM(DeepEvalBaseLLM):
 
-    def __init__(self, model_name="meta-llama/Meta-Llama-3-8B-Instruct", lora_path=None):
-        # load quantization config from json if any !TODO
-        # just take the quantized model path (assume the model is already quantized)
+    def clear_cache(self):
+        torch.cuda.empty_cache()
+        gc.collect()
 
+    def __init__(self,
+                 config=None,
+                 model_name="meta-llama/Meta-Llama-3-8B-Instruct",
+                 lora_path=None):
+
+        self.config = config
         self.model_name = model_name
-        # load the sampling params
-        self.sampling_params = SamplingParams(temperature=0, max_tokens=1024, skip_special_tokens=True)
 
-        # load lora config from json if any !TODO
-        # if the lora adapters are present, take the path
+        self.sampling_params = SamplingParams(**(vars(config.sampling_params)),
+                                              logprobs=1,
+                                              skip_special_tokens=True)
+
         if lora_path is not None:
-            adapter_lora_path = snapshot_download(repo_id=sql_lora_path)
-            llm = vllm.LLM(model=model_name, enable_lora=True)
-            self.lora_enabled = True
-            self.lora_request = LoRARequest("lora_adapter", 1, lora)
+            try:
+                adapter_lora_path = snapshot_download(
+                    repo_id=self.config.lora_path)
+                llm = vllm.LLM(model=self.config.model_name,
+                               tokenizer=self.config.model_name,
+                               enable_lora=True)
+
+                self.lora_enabled = True
+                self.lora_request = LoRARequest("lora_adapter", 1, lora)
+            except Exception as e:
+                print(e)
+                print("Lora adapter not found, using default model")
+                llm = vllm.LLM(model=self.config.model_name)
+                self.lora_enabled = False
 
         else:
-            # insert vllm code to load model (with above c)
-            llm = vllm.LLM(model=model_name)
+            llm = vllm.LLM(model=self.config.model_name, tokenizer=self.config.model_name,)
             self.lora_enabled = False
-        tokenizer = AutoTokenizer.from_pretrained(model_name)
+
+        tokenizer = AutoTokenizer.from_pretrained(self.config.model_name)
 
         self.model = llm
         self.tokenizer = tokenizer
 
-
-    def extract_first_function(self,text):
+    def extract_first_function(self, text):
         # Regular expression to match a Python function definition
         pattern = r'def\s+\w+\s*\([^)]*\)\s*(?:->\s*\w+\s*)?:\n(?:(?:\s+.*\n)+)'
 
@@ -52,17 +67,15 @@ class CustomLM(DeepEvalBaseLLM):
         else:
             return "No function definition found."
 
-
     def load_model(self):
         return self.model
 
-    def filter_code(self,completion: str) -> str:
+    def filter_code(self, completion: str) -> str:
         # The program tends to overwrite, we only take the first function
         completion = completion.lstrip("\n")
         return completion.split("\n\n")[0]
 
-
-    def fix_indents(self,text: str) -> str:
+    def fix_indents(self, text: str) -> str:
         return text.replace("\t", "    ")
 
     def generate(self, prompt: str) -> str:
@@ -74,10 +87,11 @@ class CustomLM(DeepEvalBaseLLM):
             output = model.generate(prompt, self.sampling_params,
                                     self.lora_request)
         else:
-            print("-- prompt input:--\n",prompt)
+            print("-- prompt input:--\n", prompt)
             output = model.generate(prompt, self.sampling_params)
 
-            print(" -- start of prompt output: --\n", output[0].outputs[0].text)
+            print(" -- start of prompt output: --\n",
+                  output[0].outputs[0].text)
             print("\n === end of prompt output === \n")
         # extract the model outputs
         generated_text = output[0].outputs[0].text
@@ -90,24 +104,31 @@ class CustomLM(DeepEvalBaseLLM):
         print("-- prompt input:-- \n", prompts[0])
 
         if self.lora_enabled:
-            generated_outputs = model.generate(prompt,
-                                     self.sampling_params,
-                                    self.lora_request)
+            generated_outputs = model.generate(prompt, self.sampling_params,
+                                               self.lora_request)
         else:
             generated_outputs = model.generate(prompts, self.sampling_params)
 
         # extract text
-        generated_outputs = [output.outputs[0].text for output in generated_outputs]
+        generated_outputs = [
+            output.outputs[0].text for output in generated_outputs
+        ]
 
         # fix generations
-        generated_outputs = [self.filter_code(output) for output in generated_outputs]
+        generated_outputs = [
+            self.filter_code(output) for output in generated_outputs
+        ]
 
-        generated_outputs = [output.replace("    ", "\t") for output in generated_outputs]
+        generated_outputs = [
+            output.replace("    ", "\t") for output in generated_outputs
+        ]
 
         # generated_outputs = [self.fix_indents(output) for output in generated_outputs]
 
         # extract the first def
-        generated_outputs = [self.extract_first_function(output) for output in generated_outputs]
+        generated_outputs = [
+            self.extract_first_function(output) for output in generated_outputs
+        ]
 
         responses_list = []
         for i in range(n):
@@ -126,14 +147,10 @@ class CustomLM(DeepEvalBaseLLM):
 
 
 def run_humaneval_benchmark(config):
-    # parse and load the config !TODO
-    # Define benchmark with specific tasks and number of code generations
-    benchmark = HumanEval(n=1  # take n from user
-                          )
 
-    model = CustomLM(model_name='meta-llama/Meta-Llama-3-8B-Instruct')
-    benchmark.evaluate(model=model, k=1)
-    # benchmark.evaluate(model=gpt_4, k=1)
+    benchmark = HumanEval(n=config.n)
+    model = CustomLM(model_name=config.model_name)
+    benchmark.evaluate(model=model, k=config.k)
+
     print(benchmark.overall_score)
-    # ideally return the score, and the log probs, and also maybe the saved evals
     return benchmark.overall_score, benchmark.predictions
