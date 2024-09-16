@@ -148,7 +148,6 @@ class HumanEvalCustomLM(DeepEvalBaseLLM):
 
 def run_humaneval_benchmark(config):
 
-
     benchmark = HumanEval(n=config.n)
     model = CustomLM(model_name=config.model_name)
     benchmark.evaluate(model=model, k=config.k)

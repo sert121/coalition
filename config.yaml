@@ -29,12 +29,11 @@ humaneval:
 
 
 mmlu:
-  model_name: "gpt-4"
+  model_name: "meta-llama/Meta-Llama-3-8B-Instruct"
   max_tokens: 512
   sampling_params:
     temperature: 0
     max_tokens: 100
-  few_shot_examples: 5
   lora_path: None
   n_shots: 1
   batch_size: 32
