@@ -20,7 +20,122 @@ import json
 import vllm
 from huggingface_hub import snapshot_download
 from vllm import SamplingParams
+from typing import Any, Callable, List
 
+from functools import wraps
+
+def str2bool(v):
+    if isinstance(v, bool):
+        return v
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
+
+
+def get_backend() -> str:
+    """Determine the backend based on environment or configuration."""
+    vllm_backend = args.use_vllm
+    print("VLLM backend: ", vllm_backend)
+    if vllm_backend is True:
+        return 'vllm'
+    else:
+        return 'huggingface'
+
+def backend_selector(func: Callable) -> Callable:
+    """Decorator to select the appropriate backend implementation."""
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        backend = get_backend()
+        if backend == 'vllm':
+            return vllm_implementation(*args, **kwargs)
+        else:
+            return huggingface_implementation(*args, **kwargs)
+    return wrapper
+
+@backend_selector
+def generate_batch_completion(model: Any, prompts: List[str], **kwargs) -> List[str]:
+    """Generate batch completions using the selected backend."""
+    # This function is just a placeholder. The actual implementation
+    # is determined by the backend_selector decorator.
+    pass
+
+
+def vllm_batch_implementation(model,
+                              tokenizer,
+                              prompt,
+                              num_samples_per_task,
+                              sampling_params,
+                              lora_enabled,
+                              counter,
+                              lora_request=None,
+                              filter_use=True) -> list[str]:
+    # to account for mbpp -delay , mbpp starts testing on samples from 10th sample onwards
+    """VLLM-specific implementation of batch completion."""
+    counter = counter + 10
+    sampling_params = SamplingParams(**sampling_params, logprobs=1, skip_special_tokens=True)
+
+    # change this completely. switch to vllm
+    input_batch = [prompt for _ in range(num_samples_per_task)]
+
+    # generate the model output
+    if lora_enabled:
+        batch_completions = model.generate(input_batch, sampling_params,
+                                           lora_request)
+    else:
+        print("-- prompt input:-- \n", input_batch[0])
+        batch_completions = model.generate(prompt, sampling_params)
+
+        print(" -- prompt output: --\n", batch_completions[0].outputs[0].text)
+        print(" === end of prompt output === ")
+
+    # extract the model outputs
+    generated_text = batch_completions[0].outputs[0].text
+    batch_completions = [
+        output.outputs[0].text for output in batch_completions
+    ]
+    if filter_use:
+        batch_completions = [
+            filter_code(completion) for completion in batch_completions
+        ]
+
+    return batch_completions
+
+
+
+
+def huggingface_implementation(model,
+                               tokenizer,
+                               prompt,
+                               num_samples_per_task,
+                               sampling_params,
+                               lora_enabled,
+                               counter,
+                               lora_request=None,
+                               filter_use=True) -> List[str]:
+
+    inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
+
+    with torch.no_grad():
+        outputs = model.generate(**inputs,
+                                 max_length=sampling_params['max_tokens'],
+                                 num_return_sequences=1,
+                                 temperature=sampling_params['temperature'],
+                                 pad_token_id=tokenizer.eos_token_id)
+
+    batch_completions = []
+    for output in outputs:
+        generated_code = tokenizer.decode(output, skip_special_tokens=True)
+        batch_completions.append(generated_code)
+
+    if filter_use:
+        batch_completions = [
+            filter_code(completion) for completion in batch_completions
+        ]
+
+    return batch_completions
 
 
 def write_jsonl(filename: str, data: Iterable[Dict], append: bool = False):
@@ -134,7 +249,7 @@ def run_eval_mbpp(
     pbar = tqdm(total=len(problems) * num_samples_per_task)
 
     #regulate this using config
-    sampling_params = SamplingParams(temperature=0, max_tokens=max_tokens)
+    sampling_params = {'max_tokens': max_tokens, 'temperature': temperature}
 
     # TODOL: add lora request
     counter = 0
@@ -177,40 +292,6 @@ def load_json(file_path="./mbpp_examples_magicoder_reform_v1.json"):
     return list_prompts
 
 
-def generate_batch_completion(model, tokenizer,prompt,
-                              num_samples_per_task,
-                             sampling_params, lora_enabled,
-                             counter, lora_request = None, filter_use = True) -> list[str]:
-    # to account for mbpp -delay , mbpp starts testing on samples from 10th sample onwards
-    counter = counter + 10
-    
-    # change this completely. switch to vllm
-    input_batch = [prompt for _ in range(num_samples_per_task)]
-
-    # generate the model output
-    if lora_enabled:
-        batch_completions = model.generate(input_batch, sampling_params,
-                                           lora_request)
-    else:
-        print("-- prompt input:-- \n", input_batch[0])
-        batch_completions = model.generate(prompt, sampling_params)
-
-        print(" -- prompt output: --\n", batch_completions[0].outputs[0].text)
-        print(" === end of prompt output === ")
-
-    # extract the model outputs
-    generated_text = batch_completions[0].outputs[0].text
-    batch_completions = [
-        output.outputs[0].text for output in batch_completions
-    ]
-    if filter_use:
-        batch_completions = [
-            filter_code(completion) for completion in batch_completions
-        ]
-
-    return batch_completions
-
-
 if __name__ == "__main__":
     # adjust for n = 10 etc
     parser = argparse.ArgumentParser(description="Eval model")
@@ -221,6 +302,8 @@ if __name__ == "__main__":
                         default='codellama/CodeLlama-7b-Instruct-hf'
                         )  # uncomment this line for 7b model
     parser.add_argument('--length', type=int, default=100)
+    parser.add_argument('--use_vllm', type=str2bool, default=False)
+
     args = parser.parse_args()
     print(args)
 
@@ -233,19 +316,37 @@ if __name__ == "__main__":
     print("Out path: ", out_path)
     os.makedirs("results/" + args.model_name.split('/')[0], exist_ok=True)
 
-    print("Loading tokenizer...")
-    tokenizer = AutoTokenizer.from_pretrained(args.model_name)
+    if parser.parse_args().use_vllm == True:
+        print("Loading tokenizer...")
+        tokenizer = AutoTokenizer.from_pretrained(args.model_name)
 
-    print("Loading model...")
-    # switch to vllm model
-    model = vllm.LLM(args.model_name)
+        print("Loading model...")
+        # switch to vllm model
+        model = vllm.LLM(args.model_name)
 
-    run_eval_mbpp(
-        model=model,
-        tokenizer=tokenizer,
-        num_samples_per_task=num_samples_per_task,
-        out_path=out_path,
-        generate_batch_completion=generate_batch_completion,
-        length=args.length,  #number of problems
-        format_tabs=True,
-        lora_enabled=False)
+        run_eval_mbpp(
+            model=model,
+            tokenizer=tokenizer,
+            num_samples_per_task=num_samples_per_task,
+            out_path=out_path,
+            generate_batch_completion=generate_batch_completion,
+            length=args.length,  #number of problems
+            format_tabs=True,
+            lora_enabled=False)
+
+    if args.use_vllm == False:
+        print("Loading tokenizer...")
+        tokenizer = AutoTokenizer.from_pretrained(args.model_name)
+
+        print("Loading model...")
+        model = AutoModelForCausalLM.from_pretrained(args.model_name)
+
+        run_eval_mbpp(
+            model=model,
+            tokenizer=tokenizer,
+            num_samples_per_task=num_samples_per_task,
+            out_path=out_path,
+            generate_batch_completion=generate_batch_completion,
+            length=args.length,  #number of problems
+            format_tabs=True,
+            lora_enabled=False)
